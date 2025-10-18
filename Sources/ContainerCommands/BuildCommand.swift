@@ -312,6 +312,12 @@ extension Application {
                             try Task.checkCancellation()
                             try await image.unpack(platform: nil, progressUpdate: ProgressTaskCoordinator.handler(for: unpackTask, from: unpackProgress.handler))
                         }
+                        
+                        for targetImageName in targetImageNames.dropFirst() {
+                            let existing = try await ClientImage.get(reference: imageName)
+                            let targetReference = try ClientImage.normalizeReference(targetImageName)
+                            try await existing.tag(new: targetReference)
+                        }
                     case "tar":
                         guard let dest = exp.destination else {
                             throw ContainerizationError(.invalidArgument, message: "dest is required \(exp.rawValue)")
