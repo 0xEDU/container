@@ -106,7 +106,7 @@ extension Application {
         var quiet: Bool = false
 
         @Option(name: [.short, .customLong("tag")], help: ArgumentHelp("Name for the built image", valueName: "name"))
-        var targetImageName: String = UUID().uuidString.lowercased()
+        var targetImageNames: [String] = [UUID().uuidString.lowercased()]
 
         @Option(name: .long, help: ArgumentHelp("Set the target build stage", valueName: "stage"))
         var target: String = ""
@@ -196,7 +196,7 @@ extension Application {
                 }
 
                 let imageName: String = try {
-                    let parsedReference = try Reference.parse(targetImageName)
+                    let parsedReference = try Reference.parse(targetImageNames.first!)
                     parsedReference.normalize()
                     return parsedReference.description
                 }()
@@ -349,8 +349,10 @@ extension Application {
             guard FileManager.default.fileExists(atPath: contextDir) else {
                 throw ValidationError("context dir does not exist \(contextDir)")
             }
-            guard let _ = try? Reference.parse(targetImageName) else {
-                throw ValidationError("invalid reference \(targetImageName)")
+            for name in targetImageNames {
+                guard let _ = try? Reference.parse(name) else {
+                    throw ValidationError("invalid reference \(name)")
+                }
             }
         }
     }
